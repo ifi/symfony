@@ -13,6 +13,7 @@ namespace Symfony\Component\Security\Http\Session;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Csrf\TokenStorage\ClearableTokenStorageInterface;
 
 /**
  * The default session strategy implementation.
@@ -31,10 +32,14 @@ class SessionAuthenticationStrategy implements SessionAuthenticationStrategyInte
     const INVALIDATE = 'invalidate';
 
     private $strategy;
+    private $csrfTokenStorage = null;
 
-    public function __construct($strategy)
+    public function __construct($strategy, ClearableTokenStorageInterface $csrfTokenStorage = null)
     {
         $this->strategy = $strategy;
+        if (self::MIGRATE === $strategy) {
+            $this->csrfTokenStorage = $csrfTokenStorage;
+        }
     }
 
     /**
@@ -54,6 +59,10 @@ class SessionAuthenticationStrategy implements SessionAuthenticationStrategyInte
                 // See https://bugs.php.net/63379
                 $destroy = \PHP_VERSION_ID < 50400 || \PHP_VERSION_ID >= 50411;
                 $request->getSession()->migrate($destroy);
+
+                if ($this->csrfTokenStorage) {
+                    $this->csrfTokenStorage->clear();
+                }
 
                 return;
 
