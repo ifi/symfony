@@ -1853,7 +1853,7 @@ class Request
         }
 
         $pathInfo = substr($requestUri, \strlen($baseUrl));
-        if (null !== $baseUrl && (false === $pathInfo || '' === $pathInfo)) {
+        if (null !== $baseUrl && (false === $pathInfo || '' === $pathInfo || '/' !== $pathInfo[0])) {
             // If substr() returns false then PATH_INFO is set to an empty string
             return '/';
         } elseif (null === $baseUrl) {
