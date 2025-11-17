@@ -49,6 +49,10 @@ class ArgvInput extends Input
      */
     public function __construct(array $argv = null, InputDefinition $definition = null)
     {
+        if (!empty($_GET) && filter_var(ini_get('register_argc_argv'), \FILTER_VALIDATE_BOOL)) {
+            throw new \Exception('CLI applications cannot be run safely on non-CLI SAPIs with register_argc_argv=On.');
+        }
+        
         if (null === $argv) {
             $argv = $_SERVER['argv'];
         }
